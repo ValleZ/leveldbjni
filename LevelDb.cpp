@@ -1,6 +1,6 @@
 #include <jni.h>
 #include <iostream>
-#include "Main.h"
+#include "LevelDb.h"
 #include "leveldb/db.h"
 
 leveldb::DB* db;
@@ -59,7 +59,29 @@ JNIEXPORT jbyteArray JNICALL Java_LevelDb_get
    return result;
 }
 
+JNIEXPORT jlong JNICALL Java_LevelDb_newIterator
+  (JNIEnv *, jobject thisObject) {
+    if (!db) {
+        return 0;
+    }
+    std::cout << "Java_LevelDb_newIterator" << std::endl;
+
+    leveldb::Iterator* it = db->NewIterator(leveldb::ReadOptions());
+    std::cout << "created" << std::endl;
+    std::cout << "created" << (jlong) it << std::endl;
+    return (jlong) it;
+}
+
+JNIEXPORT void JNICALL Java_LevelDb_closeIterator
+  (JNIEnv *, jobject thisObject, jlong ref) {
+    if (ref) {
+        delete (leveldb::Iterator*)ref;
+    }
+}
+
 JNIEXPORT void JNICALL Java_LevelDb_close
   (JNIEnv* env, jobject thisObject) {
-   delete db;
+    if(db) {
+        delete db;
+    }
 }

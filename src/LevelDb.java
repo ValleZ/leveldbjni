@@ -18,11 +18,14 @@ public class LevelDb {
                     System.out.println("Get failed");
                 } else {
                     System.out.println("READ " + new String(value));
-                    if(db.delete("key".getBytes())){
+                    if (db.delete("key".getBytes())) {
                         System.out.println("DEL SUCCESS");
-                    };
+                    }
                 }
             }
+            Iterator it = db.new Iterator();
+            System.out.println(it);
+
             db.close();
         }
     }
@@ -46,6 +49,9 @@ public class LevelDb {
 
         public Iterator() {
             this.ref = newIterator();
+            if (ref == 0) {
+                throw new RuntimeException("cannot create iterator");
+            }
         }
 
         @Override
