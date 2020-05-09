@@ -1,14 +1,13 @@
 import java.io.File;
-import java.util.Iterator;
 
-public class Main {
+public class LevelDb {
 
     public static void main(String[] args) {
         String ldpath = System.getProperty("java.library.path", "");
         System.out.println(ldpath + "   " + new File(ldpath).getAbsolutePath() +
                 " " + new File(ldpath, "libex.dylib").exists());
         System.loadLibrary("ex");
-        Main db = new Main();
+        LevelDb db = new LevelDb();
         boolean result = db.open("testdb", true, false);
         System.out.println(result);
         if (result) {
@@ -36,5 +35,23 @@ public class Main {
 
     private native boolean delete(byte[] key);
 
+    private native long newIterator();
+
+    private native void closeIterator(long ref);
+
     private native void close();
+
+    class Iterator {
+        final long ref;
+
+        public Iterator() {
+            this.ref = newIterator();
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+            closeIterator(ref);
+        }
+    }
 }

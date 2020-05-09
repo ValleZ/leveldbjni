@@ -5,7 +5,7 @@
 
 leveldb::DB* db;
 
-JNIEXPORT jboolean JNICALL Java_Main_open
+JNIEXPORT jboolean JNICALL Java_LevelDb_open
   (JNIEnv* env, jobject thisObject, jstring fileName,
   jboolean createIfMissing, jboolean errorIfExists) {
 
@@ -17,7 +17,7 @@ JNIEXPORT jboolean JNICALL Java_Main_open
    return status.ok();
 }
 
-JNIEXPORT jboolean JNICALL Java_Main_put
+JNIEXPORT jboolean JNICALL Java_LevelDb_put
   (JNIEnv* env, jobject thisObject, jbyteArray key, jbyteArray value) {
    jbyte *ptr = env->GetByteArrayElements(key, 0);
    std::string keyStr((char *)ptr, env->GetArrayLength(key));
@@ -31,7 +31,7 @@ JNIEXPORT jboolean JNICALL Java_Main_put
    return status.ok();
 }
 
-JNIEXPORT jboolean JNICALL Java_Main_delete
+JNIEXPORT jboolean JNICALL Java_LevelDb_delete
   (JNIEnv* env, jobject thisObject, jbyteArray key) {
    jbyte *ptr = env->GetByteArrayElements(key, 0);
    std::string keyStr((char *)ptr, env->GetArrayLength(key));
@@ -42,7 +42,7 @@ JNIEXPORT jboolean JNICALL Java_Main_delete
    return status.ok();
 }
 
-JNIEXPORT jbyteArray JNICALL Java_Main_get
+JNIEXPORT jbyteArray JNICALL Java_LevelDb_get
   (JNIEnv* env, jobject thisObject, jbyteArray key) {
    jbyte *ptr = env->GetByteArrayElements(key, 0);
    std::string keyStr((char *)ptr, env->GetArrayLength(key));
@@ -59,7 +59,7 @@ JNIEXPORT jbyteArray JNICALL Java_Main_get
    return result;
 }
 
-JNIEXPORT void JNICALL Java_Main_close
+JNIEXPORT void JNICALL Java_LevelDb_close
   (JNIEnv* env, jobject thisObject) {
    delete db;
 }
