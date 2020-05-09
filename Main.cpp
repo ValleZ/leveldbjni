@@ -6,7 +6,8 @@
 leveldb::DB* db;
 
 JNIEXPORT jboolean JNICALL Java_Main_open
-  (JNIEnv* env, jobject thisObject, jstring fileName, jboolean createIfMissing, jboolean errorIfExists) {
+  (JNIEnv* env, jobject thisObject, jstring fileName,
+  jboolean createIfMissing, jboolean errorIfExists) {
 
    leveldb::Options options;
    options.create_if_missing = createIfMissing;
@@ -30,6 +31,16 @@ JNIEXPORT jboolean JNICALL Java_Main_put
    return status.ok();
 }
 
+JNIEXPORT jboolean JNICALL Java_Main_delete
+  (JNIEnv* env, jobject thisObject, jbyteArray key) {
+   jbyte *ptr = env->GetByteArrayElements(key, 0);
+   std::string keyStr((char *)ptr, env->GetArrayLength(key));
+   env->ReleaseByteArrayElements(key, ptr, 0);
+
+   std::string value;
+   leveldb::Status status = db->Delete(leveldb::WriteOptions(), keyStr);
+   return status.ok();
+}
 
 JNIEXPORT jbyteArray JNICALL Java_Main_get
   (JNIEnv* env, jobject thisObject, jbyteArray key) {

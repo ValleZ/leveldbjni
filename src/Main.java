@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.Iterator;
 
 public class Main {
 
@@ -7,20 +8,23 @@ public class Main {
         System.out.println(ldpath + "   " + new File(ldpath).getAbsolutePath() +
                 " " + new File(ldpath, "libex.dylib").exists());
         System.loadLibrary("ex");
-        Main main = new Main();
-        boolean result = main.open("testdb", true, false);
+        Main db = new Main();
+        boolean result = db.open("testdb", true, false);
         System.out.println(result);
         if (result) {
-            if (main.put("key".getBytes(), "kgyfekuewncr".getBytes())) {
+            if (db.put("key".getBytes(), "kgyfekuewncr".getBytes())) {
                 System.out.println("PUT SUCCESS");
-                byte[] value = main.get("key".getBytes());
+                byte[] value = db.get("key".getBytes());
                 if (value == null) {
                     System.out.println("Get failed");
                 } else {
                     System.out.println("READ " + new String(value));
+                    if(db.delete("key".getBytes())){
+                        System.out.println("DEL SUCCESS");
+                    };
                 }
             }
-            main.close();
+            db.close();
         }
     }
 
@@ -29,6 +33,8 @@ public class Main {
     private native boolean put(byte[] key, byte[] value);
 
     private native byte[] get(byte[] key);
+
+    private native boolean delete(byte[] key);
 
     private native void close();
 }

@@ -33,6 +33,14 @@ JNIEXPORT jbyteArray JNICALL Java_Main_get
 
 /*
  * Class:     Main
+ * Method:    delete
+ * Signature: ([B)Z
+ */
+JNIEXPORT jboolean JNICALL Java_Main_delete
+  (JNIEnv *, jobject, jbyteArray);
+
+/*
+ * Class:     Main
  * Method:    close
  * Signature: ()V
  */
