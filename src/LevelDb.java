@@ -23,8 +23,29 @@ public class LevelDb {
                     }
                 }
             }
+            db.put("a".getBytes(), "a value".getBytes());
+            db.put("b".getBytes(), "b value".getBytes());
+            db.put("c".getBytes(), "c value".getBytes());
+
             Iterator it = db.new Iterator();
-            System.out.println(it);
+            for (it.seekToFirst(); it.valid(); it.next()) {
+                byte[] key = it.key();
+                byte[] value = it.value();
+                System.out.println(new String(key) + " -> " + new String(value));
+            }
+            System.out.println("backwards...");
+            for (it.seekToLast(); it.valid(); it.prev()) {
+                byte[] key = it.key();
+                byte[] value = it.value();
+                System.out.println(new String(key) + " -> " + new String(value));
+            }
+
+            System.out.println("mid...");
+            for (it.seek("b".getBytes()); it.valid(); it.next()) {
+                byte[] key = it.key();
+                byte[] value = it.value();
+                System.out.println(new String(key) + " -> " + new String(value));
+            }
 
             db.close();
         }
@@ -38,9 +59,25 @@ public class LevelDb {
 
     private native boolean delete(byte[] key);
 
-    private native long newIterator();
+    private native long iteratorNew();
 
-    private native void closeIterator(long ref);
+    private native void iteratorSeekToFirst(long ref);
+
+    private native void iteratorSeekToLast(long ref);
+
+    private native void iteratorSeek(long ref, byte[] key);
+
+    private native boolean iteratorValid(long ref);
+
+    private native void iteratorNext(long ref);
+
+    private native void iteratorPrev(long ref);
+
+    private native byte[] iteratorKey(long ref);
+
+    private native byte[] iteratorValue(long ref);
+
+    private native void iteratorClose(long ref);
 
     private native void close();
 
@@ -48,7 +85,7 @@ public class LevelDb {
         final long ref;
 
         public Iterator() {
-            this.ref = newIterator();
+            this.ref = iteratorNew();
             if (ref == 0) {
                 throw new RuntimeException("cannot create iterator");
             }
@@ -57,7 +94,39 @@ public class LevelDb {
         @Override
         protected void finalize() throws Throwable {
             super.finalize();
-            closeIterator(ref);
+            iteratorClose(ref);
+        }
+
+        public void seekToFirst() {
+            iteratorSeekToFirst(ref);
+        }
+
+        public boolean valid() {
+            return iteratorValid(ref);
+        }
+
+        public void next() {
+            iteratorNext(ref);
+        }
+
+        public byte[] key() {
+            return iteratorKey(ref);
+        }
+
+        public byte[] value() {
+            return iteratorValue(ref);
+        }
+
+        public void seekToLast() {
+            iteratorSeekToLast(ref);
+        }
+
+        public void prev() {
+            iteratorPrev(ref);
+        }
+
+        public void seek(byte[] key) {
+            iteratorSeek(ref, key);
         }
     }
 }
