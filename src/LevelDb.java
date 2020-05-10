@@ -1,67 +1,40 @@
 import java.io.Closeable;
-import java.io.File;
 
-public class LevelDb {
+public class LevelDb implements Closeable {
+    private final long dbRef;
 
-    public static void main(String[] args) {
-        String ldpath = System.getProperty("java.library.path", "");
-        System.out.println(ldpath + "   " + new File(ldpath).getAbsolutePath() +
-                " " + new File(ldpath, "libex.dylib").exists());
-        System.loadLibrary("leveldbjni");
-        LevelDb db = new LevelDb();
-        boolean result = db.open("testdb", true, false);
-        System.out.println(result);
-        if (result) {
-            if (db.put("key".getBytes(), "kgyfekuewncr".getBytes())) {
-                System.out.println("PUT SUCCESS");
-                byte[] value = db.get("key".getBytes());
-                if (value == null) {
-                    System.out.println("Get failed");
-                } else {
-                    System.out.println("READ " + new String(value));
-                    if (db.delete("key".getBytes())) {
-                        System.out.println("DEL SUCCESS");
-                    }
-                }
-            }
-            db.put("a".getBytes(), "a value".getBytes());
-            db.put("b".getBytes(), "b value".getBytes());
-            db.put("c".getBytes(), "c value".getBytes());
-
-            Iterator it = db.new Iterator();
-            for (it.seekToFirst(); it.valid(); it.next()) {
-                byte[] key = it.key();
-                byte[] value = it.value();
-                System.out.println(new String(key) + " -> " + new String(value));
-            }
-            System.out.println("backwards...");
-            for (it.seekToLast(); it.valid(); it.prev()) {
-                byte[] key = it.key();
-                byte[] value = it.value();
-                System.out.println(new String(key) + " -> " + new String(value));
-            }
-
-            System.out.println("mid...");
-            for (it.seek("b".getBytes()); it.valid(); it.next()) {
-                byte[] key = it.key();
-                byte[] value = it.value();
-                System.out.println(new String(key) + " -> " + new String(value));
-            }
-            it.close();
-
-            db.close();
+    public LevelDb(String fileName, boolean createIfMissing, boolean errorIfExists) {
+        dbRef = open(fileName, createIfMissing, errorIfExists);
+        if (dbRef == 0) {
+            throw new RuntimeException();
         }
     }
 
-    private native boolean open(String fileName, boolean createIfMissing, boolean errorIfExists);
+    public Iterator iterator() {
+        return new Iterator();
+    }
 
-    private native boolean put(byte[] key, byte[] value);
+    public boolean delete(byte[] key) {
+        return delete(dbRef, key);
+    }
 
-    private native byte[] get(byte[] key);
+    public byte[] get(byte[] key) {
+        return get(dbRef, key);
+    }
 
-    private native boolean delete(byte[] key);
+    public boolean put(byte[] key, byte[] value) {
+        return put(dbRef, key, value);
+    }
 
-    private native long iteratorNew();
+    private native long open(String fileName, boolean createIfMissing, boolean errorIfExists);
+
+    private native boolean put(long dbRef, byte[] key, byte[] value);
+
+    private native byte[] get(long dbRef, byte[] key);
+
+    private native boolean delete(long dbRef, byte[] key);
+
+    private native long iteratorNew(long dbRef);
 
     private native void iteratorSeekToFirst(long ref);
 
@@ -81,13 +54,18 @@ public class LevelDb {
 
     private native void iteratorClose(long ref);
 
-    private native void close();
+    private native void close(long dbRef);
+
+    @Override
+    public void close() {
+        close(dbRef);
+    }
 
     class Iterator implements Closeable {
         final long ref;
 
         public Iterator() {
-            this.ref = iteratorNew();
+            this.ref = iteratorNew(dbRef);
             if (ref == 0) {
                 throw new RuntimeException("cannot create iterator");
             }
@@ -101,7 +79,7 @@ public class LevelDb {
             iteratorSeekToFirst(ref);
         }
 
-        public boolean valid() {
+        public boolean hasNext() {
             return iteratorValid(ref);
         }
 
