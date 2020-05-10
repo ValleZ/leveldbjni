@@ -1,3 +1,4 @@
+import java.io.Closeable;
 import java.io.File;
 
 public class LevelDb {
@@ -6,7 +7,7 @@ public class LevelDb {
         String ldpath = System.getProperty("java.library.path", "");
         System.out.println(ldpath + "   " + new File(ldpath).getAbsolutePath() +
                 " " + new File(ldpath, "libex.dylib").exists());
-        System.loadLibrary("ex");
+        System.loadLibrary("leveldbjni");
         LevelDb db = new LevelDb();
         boolean result = db.open("testdb", true, false);
         System.out.println(result);
@@ -46,6 +47,7 @@ public class LevelDb {
                 byte[] value = it.value();
                 System.out.println(new String(key) + " -> " + new String(value));
             }
+            it.close();
 
             db.close();
         }
@@ -81,7 +83,7 @@ public class LevelDb {
 
     private native void close();
 
-    class Iterator {
+    class Iterator implements Closeable {
         final long ref;
 
         public Iterator() {
@@ -91,9 +93,7 @@ public class LevelDb {
             }
         }
 
-        @Override
-        protected void finalize() throws Throwable {
-            super.finalize();
+        public void close() {
             iteratorClose(ref);
         }
 
