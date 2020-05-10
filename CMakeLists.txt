@@ -26,3 +26,12 @@ message ("JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
 include_directories("${JNI_INCLUDE_DIRS}" "${CMAKE_BINARY_DIR}/leveldb-src/include")
 add_library(leveldbjni SHARED library/cpp/com_github_vallez_leveldbjni_LevelDb.cpp)
 target_link_libraries(leveldbjni "${LEVELDB_LIBRARY}")
+
+#assemble Jar file
+find_package(Java REQUIRED)
+include(UseJava)
+project (leveldbjni-jar NONE)
+set(CMAKE_JAVA_COMPILE_FLAGS "-source" "1.8" "-target" "1.8")
+add_jar(leveldbjni-jar library/src/com/github/vallez/leveldbjni/LevelDb.java
+  OUTPUT_NAME leveldbjni
+  MANIFEST ${CMAKE_BINARY_DIR}/../MANIFEST.MF)
