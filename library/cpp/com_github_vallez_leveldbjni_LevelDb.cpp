@@ -1,11 +1,11 @@
 #include <jni.h>
 #include <iostream>
-#include "LevelDb.h"
+#include "com_github_vallez_leveldbjni_LevelDb.h"
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
 #include "leveldb/filter_policy.h"
 
-JNIEXPORT jlong JNICALL Java_LevelDb_open
+JNIEXPORT jlong JNICALL Java_com_github_vallez_leveldbjni_LevelDb_open
   (JNIEnv* env, jobject thisObject, jstring fileName,
   jboolean createIfMissing, jboolean errorIfExists,
   jboolean compression, jboolean paranoidChecks,
@@ -33,7 +33,7 @@ JNIEXPORT jlong JNICALL Java_LevelDb_open
    return NULL;
 }
 
-JNIEXPORT jboolean JNICALL Java_LevelDb_put
+JNIEXPORT jboolean JNICALL Java_com_github_vallez_leveldbjni_LevelDb_put
   (JNIEnv* env, jobject thisObject, jlong dbRef, jbyteArray key, jbyteArray value) {
    jbyte *ptr = env->GetByteArrayElements(key, 0);
    std::string keyStr((char *)ptr, env->GetArrayLength(key));
@@ -47,7 +47,7 @@ JNIEXPORT jboolean JNICALL Java_LevelDb_put
    return status.ok();
 }
 
-JNIEXPORT jboolean JNICALL Java_LevelDb_delete
+JNIEXPORT jboolean JNICALL Java_com_github_vallez_leveldbjni_LevelDb_delete
   (JNIEnv* env, jobject thisObject, jlong dbRef, jbyteArray key) {
    jbyte *ptr = env->GetByteArrayElements(key, 0);
    std::string keyStr((char *)ptr, env->GetArrayLength(key));
@@ -58,7 +58,7 @@ JNIEXPORT jboolean JNICALL Java_LevelDb_delete
    return status.ok();
 }
 
-JNIEXPORT jbyteArray JNICALL Java_LevelDb_get
+JNIEXPORT jbyteArray JNICALL Java_com_github_vallez_leveldbjni_LevelDb_get
   (JNIEnv* env, jobject thisObject, jlong dbRef, jbyteArray key) {
    jbyte *ptr = env->GetByteArrayElements(key, 0);
    std::string keyStr((char *)ptr, env->GetArrayLength(key));
@@ -75,7 +75,7 @@ JNIEXPORT jbyteArray JNICALL Java_LevelDb_get
    return result;
 }
 
-JNIEXPORT jlong JNICALL Java_LevelDb_iteratorNew
+JNIEXPORT jlong JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorNew
   (JNIEnv *, jobject thisObject, jlong dbRef) {
     if (!dbRef) {
         return NULL;
@@ -84,21 +84,21 @@ JNIEXPORT jlong JNICALL Java_LevelDb_iteratorNew
     return (jlong) it;
 }
 
-JNIEXPORT void JNICALL Java_LevelDb_iteratorSeekToFirst
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorSeekToFirst
   (JNIEnv *, jobject, jlong ref) {
     if (ref) {
          ((leveldb::Iterator*)ref)->SeekToFirst();
     }
 }
 
-JNIEXPORT void JNICALL Java_LevelDb_iteratorSeekToLast
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorSeekToLast
   (JNIEnv *, jobject, jlong ref) {
     if (ref) {
          ((leveldb::Iterator*)ref)->SeekToLast();
     }
 }
 
-JNIEXPORT void JNICALL Java_LevelDb_iteratorSeek
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorSeek
   (JNIEnv * env, jobject, jlong ref, jbyteArray key) {
     if (ref) {
         jbyte *ptr = env->GetByteArrayElements(key, 0);
@@ -108,21 +108,21 @@ JNIEXPORT void JNICALL Java_LevelDb_iteratorSeek
     }
 }
 
-JNIEXPORT void JNICALL Java_LevelDb_iteratorNext
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorNext
   (JNIEnv *, jobject, jlong ref) {
     if (ref) {
          ((leveldb::Iterator*)ref)->Next();
     }
 }
 
-JNIEXPORT void JNICALL Java_LevelDb_iteratorPrev
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorPrev
   (JNIEnv *, jobject, jlong ref) {
     if (ref) {
          ((leveldb::Iterator*)ref)->Prev();
     }
 }
 
-JNIEXPORT jboolean JNICALL Java_LevelDb_iteratorValid
+JNIEXPORT jboolean JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorValid
   (JNIEnv *, jobject, jlong ref) {
     if (ref) {
          return ((leveldb::Iterator*)ref)->Valid();
@@ -130,7 +130,7 @@ JNIEXPORT jboolean JNICALL Java_LevelDb_iteratorValid
     return false;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_LevelDb_iteratorKey
+JNIEXPORT jbyteArray JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorKey
   (JNIEnv* env, jobject thisObject, jlong ref) {
 
    std::string value;
@@ -141,7 +141,7 @@ JNIEXPORT jbyteArray JNICALL Java_LevelDb_iteratorKey
    return result;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_LevelDb_iteratorValue
+JNIEXPORT jbyteArray JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorValue
   (JNIEnv* env, jobject thisObject, jlong ref) {
 
    std::string value;
@@ -152,14 +152,14 @@ JNIEXPORT jbyteArray JNICALL Java_LevelDb_iteratorValue
    return result;
 }
 
-JNIEXPORT void JNICALL Java_LevelDb_iteratorClose
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorClose
   (JNIEnv *, jobject, jlong ref) {
     if (ref) {
         delete (leveldb::Iterator*) ref;
     }
 }
 
-JNIEXPORT void JNICALL Java_LevelDb_close
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_close
   (JNIEnv*, jobject, jlong dbRef) {
     if (dbRef) {
         delete (leveldb::DB*) dbRef;

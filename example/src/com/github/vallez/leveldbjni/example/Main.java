@@ -1,3 +1,8 @@
+package com.github.vallez.leveldbjni.example;
+
+
+import com.github.vallez.leveldbjni.LevelDb;
+
 import java.io.File;
 
 public class Main {

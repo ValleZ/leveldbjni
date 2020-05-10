@@ -1,3 +1,5 @@
+package com.github.vallez.leveldbjni;
+
 import java.io.Closeable;
 import java.util.HashSet;
 import java.util.Objects;
@@ -82,8 +84,8 @@ public class LevelDb implements Closeable {
         close(dbRef);
     }
 
-    class Iterator implements Closeable {
-        final long ref;
+    public class Iterator implements Closeable {
+        private final long ref;
 
         public Iterator() {
             this.ref = iteratorNew(dbRef);
