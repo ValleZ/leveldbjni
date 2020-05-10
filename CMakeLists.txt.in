@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.17)
+project(leveldb-download NONE)
+include(ExternalProject)
+ExternalProject_Add(leveldb
+  GIT_REPOSITORY    git@github.com:google/leveldb.git
+  GIT_TAG           master
+  SOURCE_DIR        "${CMAKE_BINARY_DIR}/leveldb-src"
+  BINARY_DIR        "${CMAKE_BINARY_DIR}/leveldb-build"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  TEST_COMMAND      ""
+)
