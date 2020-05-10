@@ -2,14 +2,28 @@
 #include <iostream>
 #include "LevelDb.h"
 #include "leveldb/db.h"
+#include "leveldb/cache.h"
+#include "leveldb/filter_policy.h"
 
 JNIEXPORT jlong JNICALL Java_LevelDb_open
   (JNIEnv* env, jobject thisObject, jstring fileName,
-  jboolean createIfMissing, jboolean errorIfExists) {
+  jboolean createIfMissing, jboolean errorIfExists,
+  jboolean compression, jboolean paranoidChecks,
+  jlong cacheSizeBytes, jbyte bloomFilterBitsPerKey  ) {
 
    leveldb::Options options;
    options.create_if_missing = createIfMissing;
    options.error_if_exists = errorIfExists;
+   if (!compression) {
+        options.compression = leveldb::kNoCompression;
+   }
+   if (cacheSizeBytes>0) {
+        options.block_cache = leveldb::NewLRUCache((size_t)cacheSizeBytes);
+   }
+   if (bloomFilterBitsPerKey>0) {
+        options.filter_policy = leveldb::NewBloomFilterPolicy(bloomFilterBitsPerKey);
+   }
+   options.paranoid_checks = paranoidChecks;
    const char* fileNameCpp = env->GetStringUTFChars(fileName, NULL);
    leveldb::DB* db;
    leveldb::Status status = leveldb::DB::Open(options, fileNameCpp, &db);

@@ -5,7 +5,7 @@ public class Main {
         String ldpath = System.getProperty("java.library.path", "");
         System.out.println(new File(ldpath).getAbsolutePath());
         System.loadLibrary("leveldbjni");
-        try (LevelDb db = new LevelDb("testdb", true, false)) {
+        try (LevelDb db = new LevelDb("testdb", new LevelDb.Options())) {
             if (db.put("key".getBytes(), "kgyfekuewncr".getBytes())) {
                 System.out.println("PUT SUCCESS");
                 byte[] value = db.get("key".getBytes());

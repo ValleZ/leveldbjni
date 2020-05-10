@@ -6,8 +6,14 @@ public class LevelDb implements Closeable {
     private final long dbRef;
     private final HashSet<Iterator> iterators;
 
-    public LevelDb(String fileName, boolean createIfMissing, boolean errorIfExists) {
-        dbRef = open(fileName, createIfMissing, errorIfExists);
+    public LevelDb(String fileName, Options options) {
+        dbRef = open(fileName,
+                options.createIfMissing,
+                options.errorIfExists,
+                options.compression,
+                options.paranoidChecks,
+                options.cacheSizeBytes,
+                options.bloomFilterBitsPerKey);
         if (dbRef == 0) {
             throw new RuntimeException();
         }
@@ -32,7 +38,13 @@ public class LevelDb implements Closeable {
         return put(dbRef, key, value);
     }
 
-    private native long open(String fileName, boolean createIfMissing, boolean errorIfExists);
+    private native long open(String fileName,
+                             boolean createIfMissing,
+                             boolean errorIfExists,
+                             boolean compression,
+                             boolean paranoidChecks,
+                             long cacheSizeBytes,
+                             byte bloomFilterBitsPerKey);
 
     private native boolean put(long dbRef, byte[] key, byte[] value);
 
@@ -129,6 +141,42 @@ public class LevelDb implements Closeable {
         @Override
         public int hashCode() {
             return Objects.hash(ref);
+        }
+    }
+
+    public static final class Options {
+        boolean createIfMissing = true;
+        boolean errorIfExists;
+        boolean compression = true;
+        boolean paranoidChecks;
+        long cacheSizeBytes;
+        byte bloomFilterBitsPerKey;
+
+        public Options() {
+        }
+
+        public void setCreateIfMissing(boolean createIfMissing) {
+            this.createIfMissing = createIfMissing;
+        }
+
+        public void setErrorIfExists(boolean errorIfExists) {
+            this.errorIfExists = errorIfExists;
+        }
+
+        public void setCompression(boolean compression) {
+            this.compression = compression;
+        }
+
+        public void setParanoidChecks(boolean paranoidChecks) {
+            this.paranoidChecks = paranoidChecks;
+        }
+
+        public void setCacheSizeBytes(long cacheSizeBytes) {
+            this.cacheSizeBytes = cacheSizeBytes;
+        }
+
+        public void setBloomFilterBitsPerKey(byte bloomFilterBitsPerKey) {
+            this.bloomFilterBitsPerKey = bloomFilterBitsPerKey;
         }
     }
 }
