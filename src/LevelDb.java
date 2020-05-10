@@ -1,17 +1,23 @@
 import java.io.Closeable;
+import java.util.HashSet;
+import java.util.Objects;
 
 public class LevelDb implements Closeable {
     private final long dbRef;
+    private final HashSet<Iterator> iterators;
 
     public LevelDb(String fileName, boolean createIfMissing, boolean errorIfExists) {
         dbRef = open(fileName, createIfMissing, errorIfExists);
         if (dbRef == 0) {
             throw new RuntimeException();
         }
+        iterators = new HashSet<>();
     }
 
     public Iterator iterator() {
-        return new Iterator();
+        Iterator iterator = new Iterator();
+        iterators.add(iterator);
+        return iterator;
     }
 
     public boolean delete(byte[] key) {
@@ -58,6 +64,9 @@ public class LevelDb implements Closeable {
 
     @Override
     public void close() {
+        for (Iterator iterator : iterators) {
+            iterator.close();
+        }
         close(dbRef);
     }
 
@@ -72,7 +81,9 @@ public class LevelDb implements Closeable {
         }
 
         public void close() {
-            iteratorClose(ref);
+            if (iterators.remove(this)) {
+                iteratorClose(ref);
+            }
         }
 
         public void seekToFirst() {
@@ -105,6 +116,19 @@ public class LevelDb implements Closeable {
 
         public void seek(byte[] key) {
             iteratorSeek(ref, key);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Iterator iterator = (Iterator) o;
+            return ref == iterator.ref;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(ref);
         }
     }
 }
