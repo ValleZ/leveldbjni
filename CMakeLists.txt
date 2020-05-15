@@ -14,7 +14,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} --build .
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/leveldb-download)
 
 message (">>>>>>>>>> leveldb downloaded to leveldb-src, now building it")
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DCMAKE_BUILD_TYPE=Release .
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/leveldb-src)
 execute_process(COMMAND ${CMAKE_COMMAND} --build . --target leveldb
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/leveldb-src)
@@ -32,6 +32,21 @@ find_package(Java REQUIRED)
 include(UseJava)
 project (leveldbjni-jar NONE)
 set(CMAKE_JAVA_COMPILE_FLAGS "-source" "1.8" "-target" "1.8")
-add_jar(leveldbjni-jar library/src/com/github/vallez/leveldbjni/LevelDb.java
+set(CMAKE_JNI_TARGET TRUE)
+
+message ("CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}")
+message ("Java_JAR_EXECUTABLE=${Java_JAR_EXECUTABLE}")
+
+FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/native_jar/META-INF/native/${CMAKE_SYSTEM_NAME}")
+ADD_CUSTOM_COMMAND(TARGET leveldbjni POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_CURRENT_BINARY_DIR}/libleveldbjni.dylib
+          ${CMAKE_CURRENT_BINARY_DIR}/native_jar/META-INF/native/${CMAKE_SYSTEM_NAME}/libleveldbjni.dylib
+        COMMAND "${Java_JAR_EXECUTABLE}" -cfM native.jar -C native_jar .
+    )
+
+
+add_jar(leveldbjni-jar
+  SOURCES library/src/com/github/vallez/leveldbjni/LevelDb.java
   OUTPUT_NAME leveldbjni
-  MANIFEST ${CMAKE_BINARY_DIR}/../MANIFEST.MF)
+  MANIFEST ${CMAKE_BINARY_DIR}/../MANIFEST.MF
+  INCLUDE_JARS ${CMAKE_CURRENT_BINARY_DIR}/native.jar)
