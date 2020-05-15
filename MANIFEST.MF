@@ -1,3 +1,0 @@
-Bundle-NativeCode: META-INF/native/osx/libleveldbjni.jnilib;osname=macos
- x;processor=x86,META-INF/native/osx/libleveldbjni.jnilib;osname=macosx;
- processor=x86-64

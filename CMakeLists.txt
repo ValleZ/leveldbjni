@@ -8,6 +8,8 @@ configure_file(CMakeLists.txt.in leveldb-download/CMakeLists.txt)
 message ("CMAKE_COMMAND=${CMAKE_COMMAND}")
 message ("CMAKE_GENERATOR=${CMAKE_GENERATOR}")
 message ("CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
+message ("CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}")
+
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/leveldb-download)
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
@@ -37,16 +39,10 @@ set(CMAKE_JNI_TARGET TRUE)
 message ("CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}")
 message ("Java_JAR_EXECUTABLE=${Java_JAR_EXECUTABLE}")
 
-FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/native_jar/META-INF/native/${CMAKE_SYSTEM_NAME}")
+FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/native_jar/META-INF/native/${CMAKE_SYSTEM_NAME}")
 ADD_CUSTOM_COMMAND(TARGET leveldbjni POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_CURRENT_BINARY_DIR}/libleveldbjni.dylib
-          ${CMAKE_CURRENT_BINARY_DIR}/native_jar/META-INF/native/${CMAKE_SYSTEM_NAME}/libleveldbjni.dylib
-        COMMAND "${Java_JAR_EXECUTABLE}" -cfM native.jar -C native_jar .
+        COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_BINARY_DIR}/libleveldbjni.dylib
+          ${CMAKE_BINARY_DIR}/native_jar/META-INF/native/${CMAKE_SYSTEM_NAME}/libleveldbjni.dylib
+        COMMAND "${Java_JAVAC_EXECUTABLE}" -d native_jar ${CMAKE_SOURCE_DIR}/library/src/com/github/vallez/leveldbjni/LevelDb.java
+        COMMAND "${Java_JAR_EXECUTABLE}" -cfM leveldbjni.jar -C native_jar .
     )
-
-
-add_jar(leveldbjni-jar
-  SOURCES library/src/com/github/vallez/leveldbjni/LevelDb.java
-  OUTPUT_NAME leveldbjni
-  MANIFEST ${CMAKE_BINARY_DIR}/../MANIFEST.MF
-  INCLUDE_JARS ${CMAKE_CURRENT_BINARY_DIR}/native.jar)

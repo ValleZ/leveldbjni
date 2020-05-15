@@ -30,7 +30,7 @@ JNIEXPORT jlong JNICALL Java_com_github_vallez_leveldbjni_LevelDb_open
    if (status.ok()) {
         return (jlong) db;
    }
-   return NULL;
+   return (jlong) 0;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_github_vallez_leveldbjni_LevelDb_put
@@ -67,7 +67,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_github_vallez_leveldbjni_LevelDb_get
    std::string value;
    leveldb::Status status = ((leveldb::DB*)dbRef)->Get(leveldb::ReadOptions(), keyStr, &value);
    if(!status.ok()) {
-    return NULL;
+    return (jbyteArray) 0;
    }
 
    jbyteArray result = env->NewByteArray(value.length());
@@ -78,7 +78,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_github_vallez_leveldbjni_LevelDb_get
 JNIEXPORT jlong JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorNew
   (JNIEnv *, jobject thisObject, jlong dbRef) {
     if (!dbRef) {
-        return NULL;
+        return (jlong) 0;
     }
     leveldb::Iterator* it = ((leveldb::DB*)dbRef)->NewIterator(leveldb::ReadOptions());
     return (jlong) it;

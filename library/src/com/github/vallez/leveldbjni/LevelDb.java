@@ -1,10 +1,41 @@
 package com.github.vallez.leveldbjni;
 
-import java.io.Closeable;
+import java.io.*;
 import java.util.HashSet;
 import java.util.Objects;
 
 public class LevelDb implements Closeable {
+    static {
+        String osName = System.getProperty("os.name", "");
+        if (osName.equalsIgnoreCase("mac os x")) {
+            osName = "Darwin";
+        }
+        String fileName = System.mapLibraryName("leveldbjni");
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        String sourceFileName = "META-INF/native/" + osName + "/" + fileName;
+        File targetFile = new File(tmpDir, fileName);
+        if (targetFile.exists() && !targetFile.delete()) {
+            throw new RuntimeException("Cannot delete " + targetFile);
+        }
+        ClassLoader loader = LevelDb.class.getClassLoader();
+        try (InputStream is = loader.getResourceAsStream(sourceFileName)) {
+            if (is == null) {
+                throw new RuntimeException("Cannot read " + sourceFileName);
+            }
+            byte[] buffer = new byte[1024 * 16];
+            try (OutputStream os = new FileOutputStream(targetFile)) {
+                int read;
+                while ((read = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, read);
+                }
+                targetFile.deleteOnExit();
+            }
+            System.load(targetFile.getAbsolutePath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private final long dbRef;
     private final HashSet<Iterator> iterators;
 
