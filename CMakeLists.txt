@@ -4,7 +4,13 @@ project(leveldbjni VERSION 0.3 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+if (WIN32)
+  set(LIB_TARGET_DIR "Release/")
+else (WIN32)
+  set(LIB_TARGET_DIR "")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif (WIN32)
+
 
 message (">>>>>>>>>> download leveldb")
 configure_file(CMakeLists.txt.in leveldb-download/CMakeLists.txt)
@@ -27,7 +33,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} --build . --config Release --target lev
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/leveldb-src)
 message (">>>>>>>>>> leveldb build finished")
 find_library(LEVELDB_LIBRARY NAMES leveldb PATHS ${CMAKE_BINARY_DIR}/leveldb-src
-  ${CMAKE_BINARY_DIR}/leveldb-src/Release ${CMAKE_BINARY_DIR}/leveldb-src/Release)
+  ${CMAKE_BINARY_DIR}/leveldb-src/Release)
 message("LEVELDB_LIBRARY = ${LEVELDB_LIBRARY}")
 find_package(JNI)
 message ("JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
@@ -43,14 +49,16 @@ set(CMAKE_JAVA_COMPILE_FLAGS "-source" "1.8" "-target" "1.8")
 set(CMAKE_JNI_TARGET TRUE)
 
 message ("CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}")
+message ("CMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}")
 message ("Java_JAR_EXECUTABLE=${Java_JAR_EXECUTABLE}")
 message ("CMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX}")
 message ("CMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}")
 
-FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/native_jar/META-INF/native/${CMAKE_SYSTEM_NAME}")
+
+FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/native_jar/META-INF/native/${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}")
 ADD_CUSTOM_COMMAND(TARGET leveldbjni POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}leveldbjni${CMAKE_SHARED_LIBRARY_SUFFIX}
-          ${CMAKE_BINARY_DIR}/native_jar/META-INF/native/${CMAKE_SYSTEM_NAME}/${CMAKE_SHARED_LIBRARY_PREFIX}leveldbjni${CMAKE_SHARED_LIBRARY_SUFFIX}
+        COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_BINARY_DIR}/${LIB_TARGET_DIR}${CMAKE_SHARED_LIBRARY_PREFIX}leveldbjni${CMAKE_SHARED_LIBRARY_SUFFIX}
+          ${CMAKE_BINARY_DIR}/native_jar/META-INF/native/${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_SHARED_LIBRARY_PREFIX}leveldbjni${CMAKE_SHARED_LIBRARY_SUFFIX}
         COMMAND "${Java_JAVAC_EXECUTABLE}" -d native_jar ${CMAKE_SOURCE_DIR}/library/src/com/github/vallez/leveldbjni/LevelDb.java
         COMMAND "${Java_JAR_EXECUTABLE}" -cfM leveldbjni.jar -C native_jar .
     )

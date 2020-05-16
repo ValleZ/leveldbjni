@@ -23,4 +23,4 @@ apt-get install default-jdk
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
-cmake --build .
+cmake --build . --config Release
