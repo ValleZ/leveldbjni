@@ -6,6 +6,15 @@
 #g++ -dynamiclib -o libleveldbjni.dylib LevelDb.o ${LEVELDB_DIR}/libleveldb.a  -lc
 #rm LevelDb.o
 
+# add set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC") to leveldb when needed
+
+#ssh-keygen -t rsa -b 4096 -C "gjmwt@ya.ru"
+
+apt-get update
+apt-get install cmake
+apt-get install build-essential
+apt-get install git
+apt-get install default-jdk
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..

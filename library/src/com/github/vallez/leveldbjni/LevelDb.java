@@ -10,9 +10,11 @@ public class LevelDb implements Closeable {
         if (osName.equalsIgnoreCase("mac os x")) {
             osName = "Darwin";
         }
+        String arch = System.getProperty("os.arch");
         String fileName = System.mapLibraryName("leveldbjni");
         String tmpDir = System.getProperty("java.io.tmpdir");
-        String sourceFileName = "META-INF/native/" + osName + "/" + fileName;
+        System.out.println(osName + "/" + arch);
+        String sourceFileName = "META-INF/native/" + osName + "/" + arch + "/" + fileName;
         File targetFile = new File(tmpDir, fileName);
         if (targetFile.exists() && !targetFile.delete()) {
             throw new RuntimeException("Cannot delete " + targetFile);
