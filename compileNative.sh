@@ -8,6 +8,11 @@
 
 # add set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC") to leveldb when needed
 
+#cmake -G "Visual Studio 16 2019" ..
+#cmake --build . --config Release
+
+# docker create -it -v $(pwd):/var/prj arm64v8/debian
+
 #ssh-keygen -t rsa -b 4096 -C "gjmwt@ya.ru"
 
 apt-get update

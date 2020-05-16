@@ -7,10 +7,17 @@ import java.util.Objects;
 public class LevelDb implements Closeable {
     static {
         String osName = System.getProperty("os.name", "");
-        if (osName.equalsIgnoreCase("mac os x")) {
+        int spIndex = osName.indexOf(' ');
+        if (spIndex >= 0) {
+            osName = osName.substring(0, spIndex);
+        }
+        if (osName.equalsIgnoreCase("mac")) {
             osName = "Darwin";
         }
         String arch = System.getProperty("os.arch");
+        if (arch.equals("amd64")) {
+            arch = "x86_64";
+        }
         String fileName = System.mapLibraryName("leveldbjni");
         String tmpDir = System.getProperty("java.io.tmpdir");
         System.out.println(osName + "/" + arch);
