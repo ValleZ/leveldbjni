@@ -26,7 +26,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} --build .
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/leveldb-download)
 
 message (">>>>>>>>>> leveldb downloaded to leveldb-src, now generating build files")
-execute_process(COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release .
+execute_process(COMMAND ${CMAKE_COMMAND} -E env CXXFLAGS="-fPIC" ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release .
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/leveldb-src)
 message (">>>>>>>>>> leveldb build")
 execute_process(COMMAND ${CMAKE_COMMAND} --build . --config Release --target leveldb
