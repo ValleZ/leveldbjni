@@ -73,46 +73,5 @@ public class Main {
                 }
             }
         }
-
-
-        try (LevelDb db = new LevelDb(new File("testdb"), new LevelDb.Options())) {
-            if (db.put("key".getBytes(), "value".getBytes())) {
-                System.out.println("Read " + new String(db.get("key".getBytes())));
-                db.delete("key".getBytes());
-            }
-        }
-            db.put("a".getBytes(), "a value".getBytes());
-            db.put("b".getBytes(), "b value".getBytes());
-            db.put("c".getBytes(), "c value".getBytes());
-
-            try (LevelDb.Iterator it = db.iterator()) {
-                for (it.seekToFirst(); it.hasNext(); it.next()) {
-                    byte[] key = it.key();
-                    byte[] value = it.value();
-                    System.out.println(new String(key) + " -> " + new String(value));
-                }
-                for (it.seekToLast(); it.hasNext(); it.prev()) {
-                    byte[] key = it.key();
-                    byte[] value = it.value();
-                    System.out.println(new String(key) + " -> " + new String(value));
-                }
-                for (it.seek("b".getBytes()); it.hasNext(); it.next()) {
-                    byte[] key = it.key();
-                    byte[] value = it.value();
-                    System.out.println(new String(key) + " -> " + new String(value));
-                }
-            }
-            try (LevelDb.WriteBatch writeBatch = db.createWriteBatch()) {
-                writeBatch.delete("c".getBytes());
-                writeBatch.put("b".getBytes(), "b value updated".getBytes());
-            }
-            try (LevelDb.Iterator it = db.iterator()) {
-                for (it.seekToFirst(); it.hasNext(); it.next()) {
-                    byte[] key = it.key();
-                    byte[] value = it.value();
-                    System.out.println(new String(key) + " -> " + new String(value));
-                }
-            }
-        }
     }
 }
