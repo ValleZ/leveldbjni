@@ -16,7 +16,7 @@
 #
 cmake_minimum_required(VERSION 3.13)
 message (">>>>>>>>>> build JNI wrapper library")
-project(leveldbjni VERSION 0.3 LANGUAGES C CXX)
+project(leveldbjni VERSION 1.122.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
