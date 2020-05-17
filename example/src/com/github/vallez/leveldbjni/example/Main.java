@@ -3,12 +3,11 @@ package com.github.vallez.leveldbjni.example;
 
 import com.github.vallez.leveldbjni.LevelDb;
 
-import java.io.*;
+import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
-        try (
-                LevelDb db = new LevelDb("testdb", new LevelDb.Options())) {
+        try (LevelDb db = new LevelDb(new File("testdb"), new LevelDb.Options())) {
             if (db.put("key".getBytes(), "kgyfekuewncr".getBytes())) {
                 System.out.println("PUT SUCCESS");
                 byte[] value = db.get("key".getBytes());
@@ -40,6 +39,18 @@ public class Main {
 
                 System.out.println("mid...");
                 for (it.seek("b".getBytes()); it.hasNext(); it.next()) {
+                    byte[] key = it.key();
+                    byte[] value = it.value();
+                    System.out.println(new String(key) + " -> " + new String(value));
+                }
+            }
+            System.out.println("write batch");
+            try (LevelDb.WriteBatch writeBatch = db.createWriteBatch()) {
+                writeBatch.delete("c".getBytes());
+                writeBatch.put("b".getBytes(), "b value updated".getBytes());
+            }
+            try (LevelDb.Iterator it = db.iterator()) {
+                for (it.seekToFirst(); it.hasNext(); it.next()) {
                     byte[] key = it.key();
                     byte[] value = it.value();
                     System.out.println(new String(key) + " -> " + new String(value));

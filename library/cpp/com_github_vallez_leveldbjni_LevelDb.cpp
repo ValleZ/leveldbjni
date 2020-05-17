@@ -4,6 +4,7 @@
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
 #include "leveldb/filter_policy.h"
+#include "leveldb/write_batch.h"
 
 JNIEXPORT jlong JNICALL Java_com_github_vallez_leveldbjni_LevelDb_open
   (JNIEnv* env, jobject thisObject, jstring fileName,
@@ -73,6 +74,37 @@ JNIEXPORT jbyteArray JNICALL Java_com_github_vallez_leveldbjni_LevelDb_get
    jbyteArray result = env->NewByteArray(value.length());
    env->SetByteArrayRegion(result,0,value.length(),(jbyte*)value.c_str());
    return result;
+}
+
+JNIEXPORT jlong JNICALL Java_com_github_vallez_leveldbjni_LevelDb_writeBatchNew
+  (JNIEnv *, jobject thisObject, jlong dbRef) {
+    if (!dbRef) {
+        return (jlong) 0;
+    }
+    leveldb::WriteBatch* batch = new leveldb::WriteBatch();
+    return (jlong) batch;
+}
+
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_writeBatchPut
+  (JNIEnv* env, jobject thisObject, jlong ref, jbyteArray key, jbyteArray value) {
+   jbyte *ptr = env->GetByteArrayElements(key, 0);
+   std::string keyStr((char *)ptr, env->GetArrayLength(key));
+   env->ReleaseByteArrayElements(key, ptr, 0);
+
+   jbyte *ptrV = env->GetByteArrayElements(value, 0);
+   std::string valueStr((char *)ptrV, env->GetArrayLength(value));
+   env->ReleaseByteArrayElements(value, ptrV, 0);
+
+   ((leveldb::WriteBatch*)ref)->Put(keyStr, valueStr);
+}
+
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_writeBatchDelete
+  (JNIEnv* env, jobject thisObject, jlong ref, jbyteArray key) {
+   jbyte *ptr = env->GetByteArrayElements(key, 0);
+   std::string keyStr((char *)ptr, env->GetArrayLength(key));
+   env->ReleaseByteArrayElements(key, ptr, 0);
+
+   ((leveldb::WriteBatch*)ref)->Delete(keyStr);
 }
 
 JNIEXPORT jlong JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorNew
@@ -150,6 +182,20 @@ JNIEXPORT jbyteArray JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorV
    jbyteArray result = env->NewByteArray(value.length());
    env->SetByteArrayRegion(result,0,value.length(),(jbyte*)value.c_str());
    return result;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_github_vallez_leveldbjni_LevelDb_writeBatchWriteAndClose
+  (JNIEnv *, jobject, jlong dbRef, jlong ref) {
+    jboolean result = false;
+    if (ref) {
+        if (dbRef) {
+            leveldb::Status status = ((leveldb::DB*)dbRef)->Write(leveldb::WriteOptions(),
+                (leveldb::WriteBatch*) ref);
+            result = status.ok();
+        }
+        delete (leveldb::WriteBatch*) ref;
+    }
+    return result;
 }
 
 JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_iteratorClose

@@ -41,6 +41,38 @@ JNIEXPORT jboolean JNICALL Java_com_github_vallez_leveldbjni_LevelDb_delete
 
 /*
  * Class:     com_github_vallez_leveldbjni_LevelDb
+ * Method:    writeBatchNew
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_com_github_vallez_leveldbjni_LevelDb_writeBatchNew
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     com_github_vallez_leveldbjni_LevelDb
+ * Method:    writeBatchPut
+ * Signature: (J[B[B)V
+ */
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_writeBatchPut
+  (JNIEnv *, jobject, jlong, jbyteArray, jbyteArray);
+
+/*
+ * Class:     com_github_vallez_leveldbjni_LevelDb
+ * Method:    writeBatchDelete
+ * Signature: (J[B)V
+ */
+JNIEXPORT void JNICALL Java_com_github_vallez_leveldbjni_LevelDb_writeBatchDelete
+  (JNIEnv *, jobject, jlong, jbyteArray);
+
+/*
+ * Class:     com_github_vallez_leveldbjni_LevelDb
+ * Method:    writeBatchWriteAndClose
+ * Signature: (JJ)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_github_vallez_leveldbjni_LevelDb_writeBatchWriteAndClose
+  (JNIEnv *, jobject, jlong, jlong);
+
+/*
+ * Class:     com_github_vallez_leveldbjni_LevelDb
  * Method:    iteratorNew
  * Signature: (J)J
  */

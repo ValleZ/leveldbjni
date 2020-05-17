@@ -1,8 +1,9 @@
 package com.github.vallez.leveldbjni;
 
 import java.io.*;
-import java.util.HashSet;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LevelDb implements Closeable {
     static {
@@ -46,9 +47,17 @@ public class LevelDb implements Closeable {
     }
 
     private final long dbRef;
-    private final HashSet<Iterator> iterators;
+    private final ConcurrentHashMap<Iterator, Boolean> iterators = new ConcurrentHashMap<>();
 
-    public LevelDb(String fileName, Options options) {
+    public LevelDb(File file, Options options) {
+        if (options == null) {
+            options = new Options();
+        }
+        dbRef = open(file.getAbsolutePath(), options);
+    }
+
+    protected long open(String fileName, Options options) {
+        long dbRef;
         dbRef = open(fileName,
                 options.createIfMissing,
                 options.errorIfExists,
@@ -59,13 +68,17 @@ public class LevelDb implements Closeable {
         if (dbRef == 0) {
             throw new RuntimeException();
         }
-        iterators = new HashSet<>();
+        return dbRef;
     }
 
     public Iterator iterator() {
         Iterator iterator = new Iterator();
-        iterators.add(iterator);
+        iterators.put(iterator, true);
         return iterator;
+    }
+
+    public WriteBatch createWriteBatch() {
+        return new WriteBatch();
     }
 
     public boolean delete(byte[] key) {
@@ -94,6 +107,14 @@ public class LevelDb implements Closeable {
 
     private native boolean delete(long dbRef, byte[] key);
 
+    private native long writeBatchNew(long dbRef);
+
+    private native void writeBatchPut(long ref, byte[] key, byte[] value);
+
+    private native void writeBatchDelete(long ref, byte[] key);
+
+    private native boolean writeBatchWriteAndClose(long dbRef, long ref);
+
     private native long iteratorNew(long dbRef);
 
     private native void iteratorSeekToFirst(long ref);
@@ -118,10 +139,41 @@ public class LevelDb implements Closeable {
 
     @Override
     public void close() {
-        for (Iterator iterator : iterators) {
+        for (Iterator iterator : iterators.keySet()) {
             iterator.close();
         }
         close(dbRef);
+    }
+
+    public class WriteBatch implements Closeable {
+        private final long ref;
+        private final AtomicBoolean closed = new AtomicBoolean(false);
+
+        private WriteBatch() {
+            this.ref = writeBatchNew(dbRef);
+            if (ref == 0) {
+                throw new RuntimeException("cannot create WriteBatch");
+            }
+        }
+
+        public void put(byte[] key, byte[] value) {
+            writeBatchPut(ref, key, value);
+        }
+
+        public void delete(byte[] key) {
+            writeBatchDelete(ref, key);
+        }
+
+        public boolean write() {
+            if (closed.compareAndSet(false, true)) {
+                return writeBatchWriteAndClose(dbRef, ref);
+            }
+            return false;
+        }
+
+        public void close() {
+            write();
+        }
     }
 
     public class Iterator implements Closeable {
@@ -130,7 +182,7 @@ public class LevelDb implements Closeable {
         public Iterator() {
             this.ref = iteratorNew(dbRef);
             if (ref == 0) {
-                throw new RuntimeException("cannot create iterator");
+                throw new RuntimeException("cannot create Iterator");
             }
         }
 
