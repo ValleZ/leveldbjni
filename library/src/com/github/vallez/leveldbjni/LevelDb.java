@@ -6,6 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LevelDb implements Closeable {
+
+    public static final String LIBNAME = "leveldbjni";
+
     static {
         String osName = System.getProperty("os.name", "");
         int spIndex = osName.indexOf(' ');
@@ -19,9 +22,8 @@ public class LevelDb implements Closeable {
         if (arch.equals("amd64")) {
             arch = "x86_64";
         }
-        String fileName = System.mapLibraryName("leveldbjni");
+        String fileName = System.mapLibraryName(LIBNAME);
         String tmpDir = System.getProperty("java.io.tmpdir");
-        System.out.println(osName + "/" + arch);
         String sourceFileName = "META-INF/native/" + osName + "/" + arch + "/" + fileName;
         File targetFile = new File(tmpDir, fileName);
         if (targetFile.exists() && !targetFile.delete()) {
@@ -41,12 +43,17 @@ public class LevelDb implements Closeable {
                 targetFile.deleteOnExit();
             }
             System.load(targetFile.getAbsolutePath());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            try {
+                System.loadLibrary(LIBNAME);
+            } catch (Throwable ignored) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     private final long dbRef;
+    private final AtomicBoolean dbClosed = new AtomicBoolean();
     private final ConcurrentHashMap<Iterator, Boolean> iterators = new ConcurrentHashMap<>();
 
     public LevelDb(File file, Options options) {
@@ -139,15 +146,17 @@ public class LevelDb implements Closeable {
 
     @Override
     public void close() {
-        for (Iterator iterator : iterators.keySet()) {
-            iterator.close();
+        if (dbClosed.compareAndSet(false, true)) {
+            for (Iterator iterator : iterators.keySet()) {
+                iterator.close();
+            }
+            close(dbRef);
         }
-        close(dbRef);
     }
 
     public class WriteBatch implements Closeable {
         private final long ref;
-        private final AtomicBoolean closed = new AtomicBoolean(false);
+        private final AtomicBoolean writeBatchClosed = new AtomicBoolean(false);
 
         private WriteBatch() {
             this.ref = writeBatchNew(dbRef);
@@ -165,7 +174,7 @@ public class LevelDb implements Closeable {
         }
 
         public boolean write() {
-            if (closed.compareAndSet(false, true)) {
+            if (writeBatchClosed.compareAndSet(false, true)) {
                 return writeBatchWriteAndClose(dbRef, ref);
             }
             return false;
