@@ -165,6 +165,24 @@ class LevelDbTest {
     }
 
     @Test
+    void createWriteBatch_distinctWriteAndClose() {
+        byte[] key1 = b("key1");
+        byte[] key2 = b("key2");
+        byte[] key3 = b("key3");
+        db.put(key1, b("a"));
+        db.put(key2, b("b"));
+        LevelDb.WriteBatch batch = db.createWriteBatch();
+        batch.put(key1, b("aaa"));
+        batch.delete(key2);
+        batch.put(key3, b("ccc"));
+        assertTrue(batch.write());
+        batch.close();
+        assertArrayEquals(b("aaa"), db.get(key1));
+        assertNull(db.get(key2));
+        assertArrayEquals(b("ccc"), db.get(key3));
+    }
+
+    @Test
     void delete() {
         byte[] key = b("key");
         db.put(key, b("value"));
