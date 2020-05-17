@@ -38,6 +38,30 @@ class LevelDbTest {
     }
 
     @Test
+    void openWithBloomFilter() {
+        db.close();
+        LevelDb.Options options = new LevelDb.Options();
+        options.bloomFilterBitsPerKey = 10;
+        db = new LevelDb(dbDir, options);
+    }
+
+    @Test
+    void openWithCache() {
+        db.close();
+        LevelDb.Options options = new LevelDb.Options();
+        options.cacheSizeBytes = 10_000_000;
+        db = new LevelDb(dbDir, options);
+    }
+
+    @Test
+    void openWithNoCompression() {
+        db.close();
+        LevelDb.Options options = new LevelDb.Options();
+        options.compression = false;
+        db = new LevelDb(dbDir, options);
+    }
+
+    @Test
     void iterator_iterateForward() {
         db.put(b("a"), b("av"));
         db.put(b("b"), b("bv"));
@@ -123,6 +147,24 @@ class LevelDbTest {
     }
 
     @Test
+    void createWriteBatch_distinctWrite() {
+        byte[] key1 = b("key1");
+        byte[] key2 = b("key2");
+        byte[] key3 = b("key3");
+        db.put(key1, b("a"));
+        db.put(key2, b("b"));
+        LevelDb.WriteBatch batch = db.createWriteBatch();
+        batch.put(key1, b("aaa"));
+        batch.delete(key2);
+        batch.put(key3, b("ccc"));
+        assertTrue(batch.write());
+        assertFalse(batch.write());
+        assertArrayEquals(b("aaa"), db.get(key1));
+        assertNull(db.get(key2));
+        assertArrayEquals(b("ccc"), db.get(key3));
+    }
+
+    @Test
     void delete() {
         byte[] key = b("key");
         db.put(key, b("value"));
@@ -159,14 +201,14 @@ class LevelDbTest {
         byte[] key = b("efweio efuhdioef  epf oieifoj");
         byte[] value = new byte[10000000];
         Arrays.fill(value, (byte) 0xff);
-        db.put(key, value);
+        assertTrue(db.put(key, value));
         assertArrayEquals(value, db.get(key));
     }
 
     @Test
     void put_update() {
-        db.put(b("a"), b("1"));
-        db.put(b("a"), b("2"));
+        assertTrue(db.put(b("a"), b("1")));
+        assertTrue(db.put(b("a"), b("2")));
         assertArrayEquals(b("2"), db.get(b("a")));
     }
 
@@ -176,7 +218,7 @@ class LevelDbTest {
         db.close();
     }
 
-    private byte[] b(String s) {
-        return s.getBytes(StandardCharsets.UTF_8);
+    private static byte[] b(String s) {
+        return s == null ? null : s.getBytes(StandardCharsets.UTF_8);
     }
 }
