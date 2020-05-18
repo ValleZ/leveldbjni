@@ -85,7 +85,7 @@ class LevelDbTest {
         db.put(b("c"), b("cv"));
         StringBuilder sb = new StringBuilder();
         try (LevelDb.Iterator it = db.iterator()) {
-            for (it.seekToFirst(); it.hasNext(); it.next()) {
+            for (it.seekToFirst(); it.isValid(); it.next()) {
                 sb.append(new String(it.key(), StandardCharsets.UTF_8));
                 sb.append('=');
                 sb.append(new String(it.value(), StandardCharsets.UTF_8));
@@ -102,7 +102,7 @@ class LevelDbTest {
         db.put(b("c"), b("cv"));
         StringBuilder sb = new StringBuilder();
         try (LevelDb.Iterator it = db.iterator()) {
-            for (; it.hasNext(); it.next()) {
+            for (; it.isValid(); it.next()) {
                 sb.append(new String(it.key(), StandardCharsets.UTF_8));
                 sb.append('=');
                 sb.append(new String(it.value(), StandardCharsets.UTF_8));
@@ -119,7 +119,7 @@ class LevelDbTest {
         db.put(b("c"), b("cv"));
         StringBuilder sb = new StringBuilder();
         try (LevelDb.Iterator it = db.iterator()) {
-            for (it.seekToLast(); it.hasNext(); it.prev()) {
+            for (it.seekToLast(); it.isValid(); it.prev()) {
                 sb.append(new String(it.key(), StandardCharsets.UTF_8));
                 sb.append('=');
                 sb.append(new String(it.value(), StandardCharsets.UTF_8));
@@ -136,7 +136,7 @@ class LevelDbTest {
         db.put(b("c"), b("cv"));
         StringBuilder sb = new StringBuilder();
         try (LevelDb.Iterator it = db.iterator()) {
-            for (it.seek(b("b")); it.hasNext(); it.next()) {
+            for (it.seek(b("b")); it.isValid(); it.next()) {
                 sb.append(new String(it.key(), StandardCharsets.UTF_8));
                 sb.append('=');
                 sb.append(new String(it.value(), StandardCharsets.UTF_8));

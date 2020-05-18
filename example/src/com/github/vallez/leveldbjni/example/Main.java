@@ -23,7 +23,10 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
-        try (LevelDb db = new LevelDb(new File("testdb"), new LevelDb.Options())) {
+        LevelDb.Options options = new LevelDb.Options();
+        options.setCreateIfMissing(true);
+        options.setErrorIfExists(false);
+        try (LevelDb db = new LevelDb(new File("testdb"), options)) {
             if (db.put("key".getBytes(), "value".getBytes())) {
                 System.out.println("PUT SUCCESS");
                 byte[] value = db.get("key".getBytes());
@@ -41,20 +44,20 @@ public class Main {
             db.put("c".getBytes(), "c value".getBytes());
 
             try (LevelDb.Iterator it = db.iterator()) {
-                for (it.seekToFirst(); it.hasNext(); it.next()) {
+                for (it.seekToFirst(); it.isValid(); it.next()) {
                     byte[] key = it.key();
                     byte[] value = it.value();
                     System.out.println(new String(key) + " -> " + new String(value));
                 }
                 System.out.println("backwards...");
-                for (it.seekToLast(); it.hasNext(); it.prev()) {
+                for (it.seekToLast(); it.isValid(); it.prev()) {
                     byte[] key = it.key();
                     byte[] value = it.value();
                     System.out.println(new String(key) + " -> " + new String(value));
                 }
 
                 System.out.println("mid...");
-                for (it.seek("b".getBytes()); it.hasNext(); it.next()) {
+                for (it.seek("b".getBytes()); it.isValid(); it.next()) {
                     byte[] key = it.key();
                     byte[] value = it.value();
                     System.out.println(new String(key) + " -> " + new String(value));
@@ -66,7 +69,7 @@ public class Main {
                 writeBatch.put("b".getBytes(), "b value updated".getBytes());
             }
             try (LevelDb.Iterator it = db.iterator()) {
-                for (it.seekToFirst(); it.hasNext(); it.next()) {
+                for (it.seekToFirst(); it.isValid(); it.next()) {
                     byte[] key = it.key();
                     byte[] value = it.value();
                     System.out.println(new String(key) + " -> " + new String(value));

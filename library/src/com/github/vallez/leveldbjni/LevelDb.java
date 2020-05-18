@@ -316,7 +316,7 @@ public class LevelDb implements Closeable {
          *
          * @return true if you can retrieve current element, false if you are out of borders
          */
-        public boolean hasNext() {
+        public boolean isValid() {
             return iteratorValid(ref);
         }
 
