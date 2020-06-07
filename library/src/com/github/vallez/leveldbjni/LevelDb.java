@@ -89,6 +89,15 @@ public class LevelDb implements Closeable {
     private final ConcurrentHashMap<Iterator, Boolean> iterators = new ConcurrentHashMap<>();
 
     /**
+     * Opens or creates LevelDB using default options.
+     *
+     * @param file    Directory for the DB
+     */
+    public LevelDb(File file) {
+        this(file, null);
+    }
+
+    /**
      * Opens or creates LevelDB
      *
      * @param file    Directory for the DB
@@ -396,8 +405,9 @@ public class LevelDb implements Closeable {
          *
          * @param createIfMissing true to create database, false to throw an error when it is missed
          */
-        public void setCreateIfMissing(boolean createIfMissing) {
+        public Options setCreateIfMissing(boolean createIfMissing) {
             this.createIfMissing = createIfMissing;
+            return this;
         }
 
         /**
@@ -406,8 +416,9 @@ public class LevelDb implements Closeable {
          *
          * @param errorIfExists true to throw error, false to proceed when database already exists
          */
-        public void setErrorIfExists(boolean errorIfExists) {
+        public Options setErrorIfExists(boolean errorIfExists) {
             this.errorIfExists = errorIfExists;
+            return this;
         }
 
         /**
@@ -415,8 +426,9 @@ public class LevelDb implements Closeable {
          *
          * @param compression true to use Snappy compression when possible, false to disable it
          */
-        public void setCompression(boolean compression) {
+        public Options setCompression(boolean compression) {
             this.compression = compression;
+            return this;
         }
 
         /**
@@ -424,8 +436,9 @@ public class LevelDb implements Closeable {
          *
          * @param paranoidChecks true to enable paranoid checks
          */
-        public void setParanoidChecks(boolean paranoidChecks) {
+        public Options setParanoidChecks(boolean paranoidChecks) {
             this.paranoidChecks = paranoidChecks;
+            return this;
         }
 
         /**
@@ -433,8 +446,9 @@ public class LevelDb implements Closeable {
          *
          * @param cacheSizeBytes cache size in bytes
          */
-        public void setCacheSizeBytes(long cacheSizeBytes) {
+        public Options setCacheSizeBytes(long cacheSizeBytes) {
             this.cacheSizeBytes = cacheSizeBytes;
+            return this;
         }
 
         /**
@@ -442,8 +456,9 @@ public class LevelDb implements Closeable {
          *
          * @param bloomFilterBitsPerKey bits per key
          */
-        public void setBloomFilterBitsPerKey(byte bloomFilterBitsPerKey) {
+        public Options setBloomFilterBitsPerKey(byte bloomFilterBitsPerKey) {
             this.bloomFilterBitsPerKey = bloomFilterBitsPerKey;
+            return this;
         }
     }
 }

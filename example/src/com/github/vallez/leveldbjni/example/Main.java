@@ -23,10 +23,8 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
-        LevelDb.Options options = new LevelDb.Options();
-        options.setCreateIfMissing(true);
-        options.setErrorIfExists(false);
-        try (LevelDb db = new LevelDb(new File("testdb"), options)) {
+        try (LevelDb db = new LevelDb(new File("testdb"),
+                new LevelDb.Options().setCreateIfMissing(true).setErrorIfExists(false))) {
             if (db.put("key".getBytes(), "value".getBytes())) {
                 System.out.println("PUT SUCCESS");
                 byte[] value = db.get("key".getBytes());
