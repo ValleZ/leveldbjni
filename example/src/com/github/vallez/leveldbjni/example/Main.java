@@ -23,6 +23,7 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
+        System.out.println(System.getProperty("os.arch"));
         try (LevelDb db = new LevelDb(new File("testdb"),
                 new LevelDb.Options().setCreateIfMissing(true).setErrorIfExists(false))) {
             if (db.put("key".getBytes(), "value".getBytes())) {

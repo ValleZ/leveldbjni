@@ -16,7 +16,7 @@
 #
 cmake_minimum_required(VERSION 3.13)
 message (">>>>>>>>>> build JNI wrapper library")
-project(leveldbjni VERSION 1.122.0 LANGUAGES C CXX)
+project(leveldbjni VERSION 1.123.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -26,7 +26,11 @@ else (WIN32)
   set(LIB_TARGET_DIR "")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif (WIN32)
-
+if(APPLE)
+  execute_process(COMMAND uname -m OUTPUT_VARIABLE arch OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(HOST_ARCHITECTURE "${arch}")
+  string(TOLOWER ${HOST_ARCHITECTURE} HOST_ARCHITECTURE)
+endif()
 
 message (">>>>>>>>>> download leveldb")
 configure_file(CMakeLists.txt.in leveldb-download/CMakeLists.txt)
@@ -35,6 +39,7 @@ message ("CMAKE_COMMAND=${CMAKE_COMMAND}")
 message ("CMAKE_GENERATOR=${CMAKE_GENERATOR}")
 message ("CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
 message ("CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}")
+message ("HOST_ARCHITECTURE=${HOST_ARCHITECTURE}")
 
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/leveldb-download)
