@@ -6,6 +6,7 @@
 #g++ -dynamiclib -o libleveldbjni.dylib LevelDb.o ${LEVELDB_DIR}/libleveldb.a  -lc
 
 # docker create -it -v $(pwd):/var/prj arm64v8/debian
+# docker create --platform=linux/x86_64 -it -v $(pwd):/var/prj debian
 
 apt-get update
 apt-get install cmake
